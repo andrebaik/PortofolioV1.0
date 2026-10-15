@@ -7,6 +7,7 @@ import { SectionHeader } from "../components/SectionHeader";
 import { SkillGroup } from "../components/SkillGroup";
 import { HoloCard } from "../components/HoloCard";
 import { site } from "../data/site";
+import { useLanguage } from "../context/LanguageContext";
 
 const fadeUp = {
   initial: { opacity: 0, y: 16 },
@@ -14,52 +15,54 @@ const fadeUp = {
   transition: { duration: 0.6, ease: [0.32, 0.72, 0, 1] as const },
 };
 
-const profileDetails = [
-  {
-    label: "EDUCATION",
-    title: "Institut Teknologi Garut",
-    meta: "S1 Teknik Informatika • 2024 – Present",
-    desc: "Undergraduate study focusing on Software Architecture, Intelligent Systems, and Web Engineering. Active member of HIMATIF ITG.",
-  },
-  {
-    label: "SPECIALIZATION",
-    title: "Full Stack & Distributed Web",
-    meta: "TypeScript • Node.js • React • PostgreSQL",
-    desc: "End-to-end web engineering with strict type safety, modular API services, and resilient relational database design.",
-  },
-  {
-    label: "AI SYSTEMS",
-    title: "RAG & LLM Workflows",
-    meta: "Python • FastAPI • ChromaDB • Qwen 2.5",
-    desc: "Developing Retrieval-Augmented Generation architectures, local vector indexing, and low-latency streaming endpoints.",
-  },
-  {
-    label: "COLLABORATION",
-    title: "Garut Kota, Indonesia (GMT+7)",
-    meta: "Remote & On-site Available",
-    desc: "Open for engineering internships, full-time junior developer roles, and freelance contracts with global delivery.",
-  },
-];
-
-const pillars = [
-  {
-    index: "01",
-    title: "Schema First, Code Second",
-    desc: "Designing unambiguous data models, REST/streaming API specifications, and state machines prior to UI implementation. Clear contracts prevent costly architectural rewrites.",
-  },
-  {
-    index: "02",
-    title: "Full-Cycle Delivery",
-    desc: "Bridging complex backend logic to fluid frontends. Every feature is delivered end-to-end with typed data fetching, optimistic UI updates, and zero unnecessary runtime bloat.",
-  },
-  {
-    index: "03",
-    title: "Pragmatic Intelligence",
-    desc: "Leveraging generative AI and vector search where they solve concrete user problems, supported by deterministic fallbacks, caching, and sub-second response times.",
-  },
-];
-
 export function About() {
+  const { t } = useLanguage();
+
+  const profileDetails = [
+    {
+      label: t("about.details.01.label"),
+      title: t("about.details.01.title"),
+      meta: t("about.details.01.meta"),
+      desc: t("about.details.01.desc"),
+    },
+    {
+      label: t("about.details.02.label"),
+      title: t("about.details.02.title"),
+      meta: t("about.details.02.meta"),
+      desc: t("about.details.02.desc"),
+    },
+    {
+      label: t("about.details.03.label"),
+      title: t("about.details.03.title"),
+      meta: t("about.details.03.meta"),
+      desc: t("about.details.03.desc"),
+    },
+    {
+      label: t("about.details.04.label"),
+      title: t("about.details.04.title"),
+      meta: t("about.details.04.meta"),
+      desc: t("about.details.04.desc"),
+    },
+  ];
+
+  const pillars = [
+    {
+      index: "01",
+      title: t("about.pillar.01.title"),
+      desc: t("about.pillar.01.desc"),
+    },
+    {
+      index: "02",
+      title: t("about.pillar.02.title"),
+      desc: t("about.pillar.02.desc"),
+    },
+    {
+      index: "03",
+      title: t("about.pillar.03.title"),
+      desc: t("about.pillar.03.desc"),
+    },
+  ];
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 md:px-6 md:py-20">
 
@@ -69,41 +72,36 @@ export function About() {
         {/* Bio Narrative */}
         <motion.div {...fadeUp} className="lg:col-span-7">
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-neutral-400 dark:text-zinc-500">
-            About / Bio
+            {t("about.tag")}
           </p>
 
           <h1 className="mt-4 font-display text-[32px] font-bold leading-[1.1] tracking-[-0.03em] text-ink dark:text-white sm:text-[44px] lg:text-[50px]">
-            Engineering intelligent systems, robust APIs, and modern web interfaces.
+            {t("about.headline")}
           </h1>
 
           <div className="mt-6 space-y-4 text-[16px] leading-relaxed text-neutral-600 dark:text-zinc-300">
-            <p>
-              I’m <strong className="font-semibold text-ink dark:text-white">{site.name}</strong>, a Full Stack Developer and undergraduate Informatics Engineering student at{" "}
-              <strong className="font-semibold text-ink dark:text-white">Institut Teknologi Garut (ITG)</strong>.
-            </p>
-            <p>
-              My work spans from building custom Retrieval-Augmented Generation (RAG) search pipelines with Python, ChromaDB, and quantized Qwen models, to architecting multi-role web platforms with React, Node.js, and relational databases.
-            </p>
-            <p>
-              I prefer straightforward, maintainable engineering: strictly typed interfaces, minimal dependency overhead, and applications that load fast and stay dependable in production.
-            </p>
+            <p>{t("about.p1")}</p>
+            <p>{t("about.p2")}</p>
+            <p>{t("about.p3")}</p>
           </div>
 
           {/* Action Links */}
           <div className="mt-8 flex flex-wrap items-center gap-4 pt-2">
             <a
               href={site.cvUrl}
+              target="_blank"
+              rel="noreferrer"
               className="inline-flex items-center gap-2 rounded-lg bg-ink px-5 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-800 dark:bg-white dark:text-ink dark:hover:bg-zinc-200"
             >
               <Download size={15} />
-              Download Resume
+              {t("about.resume")}
             </a>
             <Link
               to="/contact"
               className="inline-flex items-center gap-2 rounded-lg border border-black/15 px-5 py-2.5 text-sm font-medium text-ink transition hover:bg-black/5 dark:border-white/20 dark:text-white dark:hover:bg-white/5"
             >
               <Mail size={15} />
-              Get in Touch
+              {t("about.talk")}
             </Link>
 
             {/* Minimal Social Links */}
@@ -190,8 +188,8 @@ export function About() {
       {/* ── 3. HOW I WORK (STRUCTURED NUMBERED LIST) ── */}
       <section className="mt-24 border-t border-black/10 pt-12 dark:border-white/10">
         <SectionHeader
-          title="Engineering Approach"
-          subtitle="A disciplined methodology for shipping features from specification to production."
+          title={t("about.pillars.title")}
+          subtitle={t("about.pillars.subtitle")}
         />
 
         <div className="mt-10 divide-y divide-black/10 border-b border-black/10 dark:divide-white/10 dark:border-white/10">
@@ -223,8 +221,8 @@ export function About() {
       {/* ── 4. TECHNICAL SKILLS DIRECTORY ── */}
       <section className="mt-24 border-t border-black/10 pt-12 dark:border-white/10">
         <SectionHeader
-          title="Technical Skills"
-          subtitle="Curated breakdown of core languages, frameworks, AI vector systems, and developer tooling."
+          title={t("about.skills.title")}
+          subtitle={t("about.skills.subtitle")}
         />
         <div className="mt-8">
           <SkillGroup />
@@ -236,17 +234,17 @@ export function About() {
         <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-baseline">
           <div>
             <h2 className="font-display text-2xl font-bold tracking-tight text-ink dark:text-white">
-              Available for new projects & full-time roles
+              {t("about.cta.title")}
             </h2>
             <p className="mt-1 text-sm text-neutral-500 dark:text-zinc-400">
-              Have an idea or looking to hire? I reply within 24 hours.
+              {t("about.cta.subtitle")}
             </p>
           </div>
           <Link
             to="/contact"
             className="inline-flex shrink-0 items-center gap-1.5 font-display text-sm font-semibold text-ink underline decoration-black/30 underline-offset-4 transition hover:decoration-ink dark:text-white dark:decoration-white/30 dark:hover:decoration-white"
           >
-            Contact Mochamad Vicryandre
+            {t("about.cta.button")}
             <ArrowUpRight size={14} />
           </Link>
         </div>
@@ -255,3 +253,4 @@ export function About() {
     </div>
   );
 }
+export default About;

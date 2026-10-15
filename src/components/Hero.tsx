@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { PatternWaves } from "./PatternWaves";
 import { useTheme } from "../context/ThemeContext";
+import { useLanguage } from "../context/LanguageContext";
 import { TechText } from "./TechText";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { site } from "../data/site";
 
 const ease = [0.32, 0.72, 0, 1] as const;
@@ -12,8 +13,18 @@ const nameParts = ["MOCHAMAD", "VICRYANDRE", "NURDIN"];
 
 export function Hero() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [heroActive, setHeroActive] = useState(false);
+  const heroRef = useRef<HTMLElement>(null);
 
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+
+  const textParallaxY = useTransform(scrollYProgress, [0, 1], ["0px", "120px"]);
+  const photoParallaxY = useTransform(scrollYProgress, [0, 1], ["0px", "50px"]);
+  const wavesOpacity = useTransform(scrollYProgress, [0, 0.9], [1, 0.2]);
   useEffect(() => {
     const handleIntroDone = () => setHeroActive(true);
     window.addEventListener("intro_complete", handleIntroDone);
@@ -21,7 +32,7 @@ export function Hero() {
     // Fallback: in case returning from another route or intro already played
     const timer = setTimeout(() => {
       setHeroActive(true);
-    }, 2800);
+    }, 4400);
 
     return () => {
       window.removeEventListener("intro_complete", handleIntroDone);
@@ -29,9 +40,9 @@ export function Hero() {
     };
   }, []);
   return (
-    <section className="relative w-full overflow-hidden py-16 md:py-24 lg:py-32">
+    <section ref={heroRef} className="relative w-full overflow-hidden py-16 md:py-24 lg:py-32">
       {/* ── BACKGROUND WAVES (FULL WIDTH EDGE-TO-EDGE) ── */}
-      <div className="pointer-events-none absolute inset-0 z-0 opacity-40 dark:opacity-60">
+      <motion.div style={{ opacity: wavesOpacity }} className="pointer-events-none absolute inset-0 z-0">
         <PatternWaves
           preset="lines"
           color={theme === "dark" ? "#ffffff" : "#27272a"}
@@ -48,7 +59,7 @@ export function Hero() {
           shine={0.6}
           speed={0.3}
         />
-      </div>
+      </motion.div>
 
       {/* ── CONTENT CONTAINER ── */}
       <div className="relative z-10 mx-auto w-full max-w-[1600px] px-4 sm:px-6 md:px-10 lg:px-16">
@@ -59,8 +70,9 @@ export function Hero() {
         <motion.div
           aria-label={site.name}
           className="absolute inset-0 flex flex-col justify-end z-10 select-none pb-4"
-          initial={{ opacity: 0, y: 30 }}
-          animate={heroActive ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          style={{ y: textParallaxY }}
+          initial={{ opacity: 0 }}
+          animate={heroActive ? { opacity: 1 } : { opacity: 0 }}
           transition={{ duration: 0.7, ease }}
         >
           {nameParts.map((word) => (
@@ -88,8 +100,9 @@ export function Hero() {
         {/* FOTO — z-20, di atas nama, jeda lebih lama */}
         <motion.div
           className="pointer-events-none relative z-20 ml-auto w-[min(68vw,520px)] flex-shrink-0"
-          initial={{ opacity: 0, y: 40, scale: 0.94 }}
-          animate={heroActive ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 40, scale: 0.94 }}
+          style={{ y: photoParallaxY }}
+          initial={{ opacity: 0, scale: 0.94 }}
+          animate={heroActive ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.94 }}
           transition={{ delay: 0.45, duration: 0.9, ease }}
         >
           <img
@@ -110,7 +123,7 @@ export function Hero() {
         className="relative z-20 mt-8 flex flex-col gap-4"
       >
         <p className="max-w-[52ch] text-[16px] leading-7 text-neutral-500 dark:text-zinc-400 md:text-[18px] md:leading-8">
-          {site.tagline}
+          {t("hero.tagline")}
         </p>
       </motion.div>
       </div>

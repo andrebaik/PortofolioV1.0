@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import { DriftWall, type DriftWallItem } from "../components/DriftWall";
 import { gallery } from "../data/gallery";
 import { useTheme } from "../context/ThemeContext";
+import { useLanguage } from "../context/LanguageContext";
 
 const fadeUp = {
   initial: { opacity: 0, y: 16 },
@@ -13,6 +14,7 @@ const fadeUp = {
 
 export function Gallery() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [active, setActive] = useState<string | null>(null);
 
   // Close lightbox on Escape key
@@ -25,18 +27,11 @@ export function Gallery() {
   }, []);
 
   const items = useMemo<DriftWallItem[]>(
-    () => [
-      ...gallery.map((img, i) => ({
+    () =>
+      gallery.map((img, i) => ({
         image: img,
         title: `Memory #${String(i + 1).padStart(2, "0")}`,
       })),
-      { image: "/img/andrebgbiru.webp", title: "Portrait Snapshot" },
-      { image: "/img/andre.webp", title: "Workspace & Desk" },
-      { image: "/img/himatif.webp", title: "Campus & Activities" },
-      { image: "/img/chatbot.webp", title: "Late Night Build" },
-      { image: "/img/job-board.webp", title: "Project Sprint" },
-      { image: "/img/xoralearn.webp", title: "Study & Research" },
-    ],
     []
   );
 
@@ -46,13 +41,13 @@ export function Gallery() {
       <div className="mx-auto max-w-6xl px-4 md:px-6">
         <motion.div {...fadeUp}>
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-neutral-400 dark:text-zinc-500">
-            Archive / Personal Moments
+            {t("gallery.tag")}
           </p>
           <h1 className="mt-4 font-display text-[32px] font-bold leading-[1.1] tracking-[-0.03em] text-ink dark:text-white sm:text-[44px] lg:text-[50px]">
-            Personal Gallery
+            {t("gallery.title")}
           </h1>
           <p className="mt-4 max-w-2xl text-[16px] leading-relaxed text-neutral-600 dark:text-zinc-400">
-            A personal visual space to preserve candid memories, everyday snapshots, and moments outside of code. Move your cursor to steer the perspective; click any frame to view full size.
+            {t("gallery.subtitle")}
           </p>
         </motion.div>
       </div>

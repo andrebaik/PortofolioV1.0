@@ -5,6 +5,7 @@ import { SiGithub, SiInstagram } from "react-icons/si";
 import { FaLinkedin } from "react-icons/fa";
 import { SlideCommit } from "../components/SlideCommit";
 import { useTheme } from "../context/ThemeContext";
+import { useLanguage } from "../context/LanguageContext";
 import { site } from "../data/site";
 
 const fadeUp = {
@@ -15,6 +16,7 @@ const fadeUp = {
 
 export function Contact() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const formRef = useRef<HTMLFormElement>(null);
 
   const handleConfirm = () => {
@@ -26,7 +28,7 @@ export function Contact() {
     const messageInput = form.elements.namedItem("message") as HTMLTextAreaElement | null;
 
     if (!nameInput?.value.trim() || !emailInput?.value.trim() || !messageInput?.value.trim()) {
-      throw new Error("Please fill in required fields");
+      throw new Error(t("contact.slide.error"));
     }
 
     return new Promise<void>((resolve) => {
@@ -47,13 +49,13 @@ export function Contact() {
       {/* Header */}
       <motion.div {...fadeUp}>
         <p className="font-mono text-xs uppercase tracking-[0.25em] text-neutral-400 dark:text-zinc-500">
-          Inquiries / Communication
+          {t("contact.tag")}
         </p>
         <h1 className="mt-4 font-display text-[32px] font-bold leading-[1.1] tracking-[-0.03em] text-ink dark:text-white sm:text-[44px] lg:text-[50px]">
-          Initiate Contact
+          {t("contact.title")}
         </h1>
         <p className="mt-4 max-w-2xl text-[16px] leading-relaxed text-neutral-600 dark:text-zinc-400">
-          Have an upcoming web project, an AI architecture to discuss, or an engineering role open on your team? Send a direct dispatch below.
+          {t("contact.subtitle")}
         </p>
       </motion.div>
 
@@ -67,7 +69,7 @@ export function Contact() {
             {/* Direct Email */}
             <div className="pb-6">
               <span className="font-mono text-xs uppercase tracking-wider text-neutral-400 dark:text-zinc-500">
-                Direct Email
+                {t("contact.email")}
               </span>
               <a
                 href={`mailto:${site.email}`}
@@ -80,7 +82,7 @@ export function Contact() {
             {/* Location & Timezone */}
             <div className="py-6">
               <span className="font-mono text-xs uppercase tracking-wider text-neutral-400 dark:text-zinc-500">
-                Base & Timezone
+                {t("contact.base")}
               </span>
               <p className="mt-2 flex items-center gap-2 font-display text-base font-semibold text-ink dark:text-white">
                 <MapPin size={16} className="text-neutral-400" />
@@ -91,18 +93,18 @@ export function Contact() {
             {/* Availability */}
             <div className="py-6">
               <span className="font-mono text-xs uppercase tracking-wider text-neutral-400 dark:text-zinc-500">
-                Response SLA
+                {t("contact.sla")}
               </span>
               <p className="mt-2 flex items-center gap-2 font-display text-base font-semibold text-ink dark:text-white">
                 <Clock size={16} className="text-neutral-400" />
-                Replies within 24 hours
+                {t("contact.slaValue")}
               </p>
             </div>
 
             {/* Social Channels */}
             <div className="pt-6">
               <span className="font-mono text-xs uppercase tracking-wider text-neutral-400 dark:text-zinc-500">
-                Connected Profiles
+                {t("contact.socials")}
               </span>
               <div className="mt-4 flex flex-col gap-3 font-mono text-xs">
                 <a
@@ -127,7 +129,7 @@ export function Contact() {
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 text-neutral-600 transition hover:text-ink dark:text-zinc-400 dark:hover:text-white"
                 >
-                  <SiInstagram size={15} /> Instagram / @andrebaik <ArrowUpRight size={12} />
+                  <SiInstagram size={15} /> Instagram / @andrenrdn_ <ArrowUpRight size={12} />
                 </a>
               </div>
             </div>
@@ -147,27 +149,27 @@ export function Contact() {
             <div className="grid gap-6 sm:grid-cols-2">
               <div className="space-y-2">
                 <label htmlFor="name" className="block font-mono text-xs uppercase tracking-wider text-neutral-500 dark:text-zinc-400">
-                  Your Name *
+                  {t("contact.form.name")}
                 </label>
                 <input
                   id="name"
                   name="name"
                   required
-                  placeholder="e.g. Alex Pratama"
+                  placeholder="e.g. Andre baik"
                   className="w-full rounded-lg border border-black/15 bg-white px-4 py-3 text-sm text-ink outline-none transition focus:border-ink dark:border-white/20 dark:bg-zinc-900 dark:text-white dark:focus:border-white"
                 />
               </div>
 
               <div className="space-y-2">
                 <label htmlFor="email" className="block font-mono text-xs uppercase tracking-wider text-neutral-500 dark:text-zinc-400">
-                  Email Address *
+                  {t("contact.form.email")}
                 </label>
                 <input
                   id="email"
                   name="email"
                   type="email"
                   required
-                  placeholder="alex@domain.com"
+                  placeholder="example@gmail.com"
                   className="w-full rounded-lg border border-black/15 bg-white px-4 py-3 text-sm text-ink outline-none transition focus:border-ink dark:border-white/20 dark:bg-zinc-900 dark:text-white dark:focus:border-white"
                 />
               </div>
@@ -175,7 +177,7 @@ export function Contact() {
 
             <div className="space-y-2">
               <label htmlFor="subject" className="block font-mono text-xs uppercase tracking-wider text-neutral-500 dark:text-zinc-400">
-                Subject
+                {t("contact.form.subject")}
               </label>
               <input
                 id="subject"
@@ -187,7 +189,7 @@ export function Contact() {
 
             <div className="space-y-2">
               <label htmlFor="message" className="block font-mono text-xs uppercase tracking-wider text-neutral-500 dark:text-zinc-400">
-                Message & Scope *
+                {t("contact.form.message")}
               </label>
               <textarea
                 id="message"
@@ -201,9 +203,9 @@ export function Contact() {
 
             <div className="pt-2">
               <SlideCommit
-                label="Slide to dispatch message"
-                doneLabel="Dispatched"
-                errorLabel="Fill required fields"
+                label={t("contact.slide.label")}
+                doneLabel={t("contact.slide.done")}
+                errorLabel={t("contact.slide.error")}
                 onConfirm={handleConfirm}
                 width={300}
                 height={52}
@@ -222,3 +224,4 @@ export function Contact() {
     </div>
   );
 }
+export default Contact;

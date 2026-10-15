@@ -1,39 +1,63 @@
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import type { Project } from "../data/projects";
+import { CardContainer, CardBody, CardItem } from "./ui/3d-card-effect";
+import { useLanguage } from "../context/LanguageContext";
 
 export function ProjectCard({ p }: { p: Project }) {
+  const { t } = useLanguage();
   return (
-    <article className="group flex flex-col justify-between overflow-hidden rounded-xl border border-black/10 bg-white transition duration-300 hover:border-black/30 dark:border-white/10 dark:bg-zinc-900 dark:hover:border-white/30">
-      <div>
-        <Link to={`/projects/${p.slug}`} className="block overflow-hidden bg-neutral-100 dark:bg-zinc-800">
-          <img
-            src={p.image}
-            alt={p.title}
-            className="aspect-[16/10] w-full object-cover transition duration-500 group-hover:scale-[1.02]"
-            loading="lazy"
-          />
-        </Link>
-        <div className="p-6 md:p-7">
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400 dark:text-zinc-500">
-              {p.category}
-            </span>
-          </div>
-
-          <Link
-            to={`/projects/${p.slug}`}
-            className="mt-2.5 inline-flex items-center gap-1.5 font-display text-xl font-bold tracking-tight text-ink transition hover:opacity-75 dark:text-white"
+    <CardContainer containerClassName="py-0 w-full block" className="w-full">
+      <CardBody className="group/card relative flex h-full w-full flex-col justify-between overflow-hidden rounded-xl border border-black/10 bg-white p-6 transition-all duration-300 hover:border-black/30 dark:border-white/10 dark:bg-zinc-900 dark:hover:border-white/30 dark:hover:shadow-2xl dark:hover:shadow-lime/5 md:p-7">
+        <div>
+          {/* Category */}
+          <CardItem
+            translateZ={30}
+            className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400 dark:text-zinc-500"
           >
-            <span>{p.title}</span>
-            <ArrowUpRight size={16} className="transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </Link>
+            {p.category}
+          </CardItem>
 
-          <p className="mt-3 text-sm leading-relaxed text-neutral-600 dark:text-zinc-400">
+          {/* Title */}
+          <CardItem
+            translateZ={50}
+            className="mt-2 font-display text-xl font-bold tracking-tight text-ink dark:text-white"
+          >
+            <Link
+              to={`/projects/${p.slug}`}
+              className="inline-flex items-center gap-1.5 transition hover:opacity-75"
+            >
+              <span>{p.title}</span>
+              <ArrowUpRight size={16} />
+            </Link>
+          </CardItem>
+
+          {/* Description */}
+          <CardItem
+            as="p"
+            translateZ={40}
+            className="mt-2.5 text-sm leading-relaxed text-neutral-600 dark:text-zinc-400"
+          >
             {p.description}
-          </p>
+          </CardItem>
 
-          <div className="mt-5 flex flex-wrap gap-2">
+          {/* Floating 3D Image */}
+          <CardItem
+            translateZ={75}
+            className="mt-5 w-full overflow-hidden rounded-lg bg-neutral-100 dark:bg-zinc-800"
+          >
+            <Link to={`/projects/${p.slug}`} className="block overflow-hidden">
+              <img
+                src={p.image}
+                alt={p.title}
+                className="aspect-[16/10] w-full object-cover transition duration-500 group-hover/card:scale-[1.03]"
+                loading="lazy"
+              />
+            </Link>
+          </CardItem>
+
+          {/* Tags */}
+          <CardItem translateZ={45} className="mt-5 flex flex-wrap gap-2">
             {p.tags.map((t) => (
               <span
                 key={t}
@@ -42,40 +66,44 @@ export function ProjectCard({ p }: { p: Project }) {
                 #{t}
               </span>
             ))}
-          </div>
+          </CardItem>
         </div>
-      </div>
 
-      <div className="border-t border-black/5 px-6 py-4 dark:border-white/5 md:px-7">
-        <div className="flex items-center justify-between text-xs font-medium">
-          <Link
+        {/* Action Links */}
+        <div className="mt-6 flex items-center justify-between border-t border-black/5 pt-4 text-xs font-medium dark:border-white/5">
+          <CardItem
+            translateZ={35}
+            as={Link}
             to={`/projects/${p.slug}`}
             className="font-display text-sm font-semibold text-ink underline decoration-black/20 underline-offset-4 transition hover:decoration-ink dark:text-white dark:decoration-white/20 dark:hover:decoration-white"
           >
-            View Details
-          </Link>
-          {p.links.live ? (
-            <a
-              href={p.links.live}
-              target="_blank"
-              rel="noreferrer"
-              className="text-neutral-500 transition hover:text-ink dark:text-zinc-400 dark:hover:text-white"
-            >
-              Live Demo ↗
-            </a>
-          ) : p.links.github ? (
-            <a
-              href={p.links.github}
-              target="_blank"
-              rel="noreferrer"
-              className="text-neutral-500 transition hover:text-ink dark:text-zinc-400 dark:hover:text-white"
-            >
-              GitHub Repo ↗
-            </a>
-          ) : null}
+            {t("projects.viewDetails")}
+          </CardItem>
+
+          <CardItem translateZ={35} className="flex items-center gap-3">
+            {p.links.live ? (
+              <a
+                href={p.links.live}
+                target="_blank"
+                rel="noreferrer"
+                className="text-neutral-500 transition hover:text-ink dark:text-zinc-400 dark:hover:text-white"
+              >
+                {t("projects.liveDemo")}
+              </a>
+            ) : p.links.github ? (
+              <a
+                href={p.links.github}
+                target="_blank"
+                rel="noreferrer"
+                className="text-neutral-500 transition hover:text-ink dark:text-zinc-400 dark:hover:text-white"
+              >
+                {t("projects.githubRepo")}
+              </a>
+            ) : null}
+          </CardItem>
         </div>
-      </div>
-    </article>
+      </CardBody>
+    </CardContainer>
   );
 }
 
@@ -112,3 +140,4 @@ export function ProjectCardRow({ p, reverse }: { p: Project; reverse?: boolean }
     </article>
   );
 }
+export default ProjectCard;

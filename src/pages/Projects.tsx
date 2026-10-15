@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ProjectCard } from "../components/ProjectCard";
 import { projects } from "../data/projects";
+import { useLanguage } from "../context/LanguageContext";
 
 const fadeUp = {
   initial: { opacity: 0, y: 16 },
@@ -9,17 +10,19 @@ const fadeUp = {
 };
 
 export function Projects() {
+  const { t } = useLanguage();
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 md:px-6 md:py-20">
       <motion.div {...fadeUp}>
         <p className="font-mono text-xs uppercase tracking-[0.25em] text-neutral-400 dark:text-zinc-500">
-          Index / Works
+          {t("projects.tag")}
         </p>
         <h1 className="mt-4 font-display text-[32px] font-bold leading-[1.1] tracking-[-0.03em] text-ink dark:text-white sm:text-[44px] lg:text-[50px]">
-          Selected Works & Systems
+          {t("projects.title")}
         </h1>
         <p className="mt-4 max-w-2xl text-[16px] leading-relaxed text-neutral-600 dark:text-zinc-400">
-          A showcase of full-stack applications, Retrieval-Augmented Generation (RAG) AI engines, and interactive web platforms built for reliability and speed.
+          {t("projects.subtitle")}
         </p>
       </motion.div>
 
@@ -31,3 +34,4 @@ export function Projects() {
     </div>
   );
 }
+export default Projects;
