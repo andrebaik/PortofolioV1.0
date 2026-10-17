@@ -61,7 +61,7 @@ Engineered with an editorial Swiss-minimalist aesthetic, the site replaces gener
 ### 5. AI Assistant (7Dynn)
 - **Provider Chain:** `POST /api/chat` streams from Groq (`openai/gpt-oss-120b` → `qwen/qwen3.8-27b` → `openai/gpt-oss-20b`) and falls back to OpenRouter (`openrouter/free`) before returning `502`.
 - **Shared SSE Parser:** `parseSseStream` in `api/chat.ts` and `vite.config.ts` decodes `choices[0].delta.content` for both providers, so local dev and production behave identically.
-- **Grounded Prompt:** `src/lib/chat-knowledge.ts` builds the system prompt from the same `src/data/` registries that render the site, keeping answers in sync with published content.
+- **Grounded Prompt:** `api/chat.ts` defines the grounded system prompt based on real portfolio records, keeping answers strictly aligned with published projects and credentials.
 - **Resilient Client:** `src/hooks/useChat.ts` aborts in-flight streams on unmount or a newer message, persists only settled transcripts to `localStorage` (`portfolio.chat.v1`, capped at 40 messages), and never surfaces an intentional abort as an error.
 - **Route Safety:** Every route is wrapped in `ErrorBoundary` keyed by pathname, so a crash on one page cannot poison the next.
 
@@ -124,8 +124,7 @@ portfolv2/
 │   │   └── gallery.ts          # Archive image sources
 │   ├── hooks/
 │   │   └── useChat.ts          # Streaming chat state, abort, persistence
-│   ├── lib/
-│   │   └── chat-knowledge.ts   # System prompt & portfolio context
+│   ├── lib/                    # Classnames & styling utilities
 │   ├── pages/                  # Page-level route views
 │   │   ├── Home.tsx            # Hero, role marquee, stack, selected works
 │   │   ├── About.tsx           # Bio, HoloCard, bento specs, principles

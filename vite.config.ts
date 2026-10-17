@@ -1,7 +1,7 @@
 import react from '@vitejs/plugin-react'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
-import { buildChatSystemPrompt } from './src/lib/chat-knowledge.ts'
+import { SYSTEM_PROMPT } from './api/chat.ts'
 import { publicRoutes } from './src/data/routes.ts'
 import { projects } from './src/data/projects.ts'
 
@@ -91,7 +91,7 @@ async function streamLlmToResponse(
   formattedMessages: ChatMessage[],
   extraHeaders: Record<string, string> = {}
 ): Promise<boolean> {
-  const systemPrompt = buildChatSystemPrompt()
+  const systemPrompt = SYSTEM_PROMPT
 
   for (const modelName of models) {
     try {
