@@ -1,0 +1,17 @@
+export const gallery = [
+  "/img/gallery/gallery-02.webp",
+  "/img/gallery/gallery-03.webp",
+  "/img/gallery/gallery-04.webp",
+  "/img/gallery/gallery-05.webp",
+  "/img/gallery/gallery-06.webp",
+  "/img/gallery/gallery-07.webp",
+  "/img/gallery/gallery-08.webp",
+  "/img/gallery/gallery-09.webp",
+  "/img/gallery/gallery-10.webp",
+  "/img/gallery/gallery-11.webp",
+  "/img/gallery/gallery-12.webp",
+  "/img/gallery/gallery-13.webp",
+  "/img/gallery/gallery-14.webp",
+  "/img/gallery/gallery-15.webp",
+  "/img/gallery/gallery-16.webp",
+];

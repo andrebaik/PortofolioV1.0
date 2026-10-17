@@ -1,14 +1,14 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, Download, Mail } from "lucide-react";
+import { ArrowUpRight, Download, Mail, ExternalLink, ShieldCheck } from "lucide-react";
 import { SiGithub, SiInstagram } from "react-icons/si";
 import { FaLinkedin } from "react-icons/fa";
 import { SectionHeader } from "../components/SectionHeader";
 import { SkillGroup } from "../components/SkillGroup";
 import { HoloCard } from "../components/HoloCard";
 import { site } from "../data/site";
+import { certificates } from "../data/certificates";
 import { useLanguage } from "../context/LanguageContext";
-
 const fadeUp = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
@@ -16,7 +16,8 @@ const fadeUp = {
 };
 
 export function About() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const isId = lang === "id";
 
   const profileDetails = [
     {
@@ -229,7 +230,89 @@ export function About() {
         </div>
       </section>
 
-      {/* ── 5. DIRECT CALL TO ACTION ── */}
+      {/* ── 5. CERTIFICATIONS & CREDENTIALS ── */}
+      <section className="mt-24 border-t border-black/10 pt-12 dark:border-white/10">
+        <SectionHeader
+          title={isId ? "SERTIFIKASI RESMI" : "VERIFIED CREDENTIALS"}
+          subtitle={
+            isId
+              ? "Validasi kompetensi teknis dari Dicoding Indonesia — terakreditasi dan terverifikasi secara publik."
+              : "Industry-accredited technical certifications from Dicoding Indonesia."
+          }
+        />
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {certificates.map((cert) => (
+            <div
+              key={cert.id}
+              className="group relative flex flex-col justify-between rounded-2xl border border-black/[0.08] bg-white/70 p-5 shadow-xs transition-all duration-200 hover:border-black/20 hover:bg-white hover:shadow-sm dark:border-white/[0.08] dark:bg-zinc-900/60 dark:hover:border-white/20 dark:hover:bg-zinc-900"
+            >
+              <div>
+                {/* Certificate Preview Image */}
+                <a
+                  href={cert.credentialUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block relative mb-4 overflow-hidden rounded-xl border border-black/5 dark:border-white/10 bg-neutral-100 dark:bg-zinc-800 aspect-[16/11] group-hover:shadow-md transition-shadow"
+                >
+                  <img
+                    src={cert.image}
+                    alt={cert.title}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100 flex items-end p-3">
+                    <span className="text-[11px] font-mono text-white flex items-center gap-1.5 font-medium">
+                      <ExternalLink size={12} /> {isId ? "Buka Verifikasi Resmi" : "View Credential"}
+                    </span>
+                  </div>
+                </a>
+
+                <div className="flex items-center justify-between gap-2 mb-2.5">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+                    <ShieldCheck size={12} className="shrink-0" />
+                    <span>{cert.issuer}</span>
+                  </span>
+                  <span className="font-mono text-[11px] text-neutral-400 dark:text-zinc-500">
+                    ID: {cert.credentialId}
+                  </span>
+                </div>
+
+                <h3 className="font-display text-base font-bold tracking-tight text-ink dark:text-white group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
+                  {cert.title}
+                </h3>
+
+                <p className="mt-2 text-xs leading-relaxed text-neutral-600 dark:text-zinc-400">
+                  {cert.description}
+                </p>
+
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {cert.skills.map((skill) => (
+                    <span
+                      key={skill}
+                      className="rounded-md border border-black/5 bg-neutral-100/80 px-2 py-0.5 font-mono text-[10px] text-neutral-600 dark:border-white/5 dark:bg-zinc-800/80 dark:text-zinc-300"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-5 flex items-center justify-between pt-3.5 border-t border-black/5 dark:border-white/5">
+                <a
+                  href={cert.credentialUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-neutral-900 px-3.5 py-2 font-mono text-xs font-medium text-white transition hover:bg-neutral-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+                >
+                  <span>{isId ? "Verifikasi Kredensial" : "Verify Credential"}</span>
+                  <ExternalLink size={12} />
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+      {/* ── 6. DIRECT CALL TO ACTION ── */}
       <section className="mt-24 border-t border-black/10 py-12 dark:border-white/10">
         <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-baseline">
           <div>

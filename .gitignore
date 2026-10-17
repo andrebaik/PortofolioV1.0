@@ -22,20 +22,7 @@ docs/
 *.docx
 *.pdf
 
-# ── Photos & Image Files (Personal) ───────────────────────────────
-public/img/
-*.png
-*.jpg
-*.jpeg
-*.webp
-*.avif
-*.gif
-
-# ── Data Directories & Configs (Personal Data) ────────────────────
-data/
-src/data/
-
-# ── Environment & Secret Keys ─────────────────────────────────────
+# ── Environment & Secret Keys (ALWAYS PROTECTED) ─────────────────
 .env
 .env.local
 .env.development.local
@@ -47,6 +34,12 @@ src/data/
 
 # Preserve example environment template
 !.env.example
+
+# ── Certificates: Allow webp preview images, NEVER push pdfs ─────
+!public/certificates/
+!public/certificates/*.webp
+!public/certificates/.gitkeep
+public/certificates/*.pdf
 
 # ── Logs & Debugging ──────────────────────────────────────────────
 logs/
@@ -76,28 +69,21 @@ coverage/
 *.sw?
 *.sublime-project
 *.sublime-workspace
-
-# VS Code — preserve workspace recommendations, ignore user state
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
 
 # ── Operating System Junk ─────────────────────────────────────────
-# macOS
 .DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
-
-# Windows
 Thumbs.db
 Thumbs.db:encryptable
 ehthumbs.db
 ehthumbs_vista.db
 [Dd]esktop.ini
-
-# Linux
 *~
 *.tmp
 *.temp
