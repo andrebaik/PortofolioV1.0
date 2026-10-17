@@ -22,6 +22,9 @@ docs/
 *.docx
 *.pdf
 
+# Public CV is a runtime asset linked from the UI — must ship
+!public/cv.pdf
+
 # ── Environment & Secret Keys (ALWAYS PROTECTED) ─────────────────
 .env
 .env.local
@@ -88,3 +91,6 @@ ehthumbs_vista.db
 *.tmp
 *.temp
 *.bak
+
+# ── Local session transcripts ─────────────────────────────────────
+session-ses_*.md

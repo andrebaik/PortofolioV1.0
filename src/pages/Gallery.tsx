@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { DriftWall, type DriftWallItem } from "../components/DriftWall";
+import { Seo } from "../components/Seo";
 import { gallery } from "../data/gallery";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -37,6 +38,7 @@ export function Gallery() {
 
   return (
     <div className="w-full pt-12 pb-20 md:pt-16 md:pb-28">
+      <Seo path="/gallery" title={t("gallery.title")} description={t("gallery.subtitle")} />
       {/* Editorial Header */}
       <div className="mx-auto max-w-6xl px-4 md:px-6">
         <motion.div {...fadeUp}>

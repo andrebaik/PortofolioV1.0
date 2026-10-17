@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ProjectCard } from "../components/ProjectCard";
+import { Seo } from "../components/Seo";
 import { projects } from "../data/projects";
 import { useLanguage } from "../context/LanguageContext";
 
@@ -14,6 +15,7 @@ export function Projects() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 md:px-6 md:py-20">
+      <Seo path="/projects" title={t("projects.title")} description={t("projects.subtitle")} />
       <motion.div {...fadeUp}>
         <p className="font-mono text-xs uppercase tracking-[0.25em] text-neutral-400 dark:text-zinc-500">
           {t("projects.tag")}

@@ -4,6 +4,7 @@ import { ArrowUpRight, Download, Mail, ExternalLink, ShieldCheck } from "lucide-
 import { SiGithub, SiInstagram } from "react-icons/si";
 import { FaLinkedin } from "react-icons/fa";
 import { SectionHeader } from "../components/SectionHeader";
+import { Seo } from "../components/Seo";
 import { SkillGroup } from "../components/SkillGroup";
 import { HoloCard } from "../components/HoloCard";
 import { site } from "../data/site";
@@ -66,6 +67,7 @@ export function About() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 md:px-6 md:py-20">
+      <Seo path="/about" title={t("about.tag")} description={t("about.headline")} />
 
       {/* ── 1. HERO BIO + PHOTO ── */}
       <section className="grid gap-12 lg:grid-cols-12 lg:items-start">

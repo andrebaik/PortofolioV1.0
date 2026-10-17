@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowUpRight, Globe } from "lucide-react";
 import { SiGithub } from "react-icons/si";
 import { projects } from "../data/projects";
+import { Seo } from "../components/Seo";
 import { useLanguage } from "../context/LanguageContext";
 
 export function ProjectDetail() {
@@ -12,6 +13,7 @@ export function ProjectDetail() {
   if (!p) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-20 md:px-6">
+        <Seo title={t("projects.notFound")} path={`/projects/${slug}`} noindex />
         <h1 className="font-display text-2xl font-bold dark:text-white">{t("projects.notFound")}</h1>
         <p className="mt-2 text-neutral-500 dark:text-zinc-400">{t("projects.notFoundDesc")}</p>
         <Link
@@ -26,6 +28,7 @@ export function ProjectDetail() {
 
   return (
     <article className="mx-auto max-w-5xl px-4 py-12 md:px-6 md:py-20">
+      <Seo title={p.title} description={p.description} path={`/projects/${p.slug}`} />
       {/* Back button */}
       <div>
         <Link

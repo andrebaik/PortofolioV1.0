@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Download } from "lucide-react";
 import { Timeline } from "../components/Timeline";
+import { Seo } from "../components/Seo";
 import { experiences } from "../data/experience";
 import { site } from "../data/site";
 import { useLanguage } from "../context/LanguageContext";
@@ -16,6 +17,7 @@ export function Experience() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 md:px-6 md:py-20">
+      <Seo path="/experience" title={t("experience.title")} description={t("experience.subtitle")} />
       {/* Header */}
       <motion.div {...fadeUp}>
         <p className="font-mono text-xs uppercase tracking-[0.25em] text-neutral-400 dark:text-zinc-500">

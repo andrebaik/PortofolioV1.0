@@ -4,6 +4,7 @@ import { ArrowUpRight, MapPin, Clock } from "lucide-react";
 import { SiGithub, SiInstagram } from "react-icons/si";
 import { FaLinkedin } from "react-icons/fa";
 import { SlideCommit } from "../components/SlideCommit";
+import { Seo } from "../components/Seo";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 import { site } from "../data/site";
@@ -46,6 +47,7 @@ export function Contact() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 md:px-6 md:py-20">
+      <Seo path="/contact" title={t("contact.title")} description={t("contact.subtitle")} />
       {/* Header */}
       <motion.div {...fadeUp}>
         <p className="font-mono text-xs uppercase tracking-[0.25em] text-neutral-400 dark:text-zinc-500">

@@ -58,6 +58,13 @@ Engineered with an editorial Swiss-minimalist aesthetic, the site replaces gener
 - **Bilingual Support:** Instant runtime switching between English (`EN`) and Bahasa Indonesia (`ID`).
 - **Deterministic Scroll-to-Top:** Window and document scroll automatically reset to `(0, 0)` upon every route transition.
 
+### 5. AI Assistant (7Dynn)
+- **Provider Chain:** `POST /api/chat` streams from Groq (`openai/gpt-oss-120b` → `qwen/qwen3.8-27b` → `openai/gpt-oss-20b`) and falls back to OpenRouter (`openrouter/free`) before returning `502`.
+- **Shared SSE Parser:** `parseSseStream` in `api/chat.ts` and `vite.config.ts` decodes `choices[0].delta.content` for both providers, so local dev and production behave identically.
+- **Grounded Prompt:** `src/lib/chat-knowledge.ts` builds the system prompt from the same `src/data/` registries that render the site, keeping answers in sync with published content.
+- **Resilient Client:** `src/hooks/useChat.ts` aborts in-flight streams on unmount or a newer message, persists only settled transcripts to `localStorage` (`portfolio.chat.v1`, capped at 40 messages), and never surfaces an intentional abort as an error.
+- **Route Safety:** Every route is wrapped in `ErrorBoundary` keyed by pathname, so a crash on one page cannot poison the next.
+
 ---
 
 ## Tech Stack
@@ -78,9 +85,13 @@ Engineered with an editorial Swiss-minimalist aesthetic, the site replaces gener
 
 ```text
 portfolv2/
+├── api/
+│   └── chat.ts                 # Serverless chat endpoint (Groq → OpenRouter)
 ├── public/                     # Static public assets
 │   ├── favicon.ico             # Site favicon
 │   ├── icons.svg               # Vector sprite references
+│   ├── cv.pdf                  # Public résumé download
+│   ├── certificates/           # First-page WebP credential previews
 │   └── img/                    # Optimized WebP assets & project screenshots
 ├── src/
 │   ├── assets/                 # SVGs and static brand marks
@@ -97,6 +108,9 @@ portfolv2/
 │   │   ├── Timeline.tsx        # Experience & career ledger
 │   │   ├── SkillGroup.tsx      # Hairline technical skills directory
 │   │   ├── SectionHeader.tsx   # Uniform section titles
+│   │   ├── Seo.tsx             # Per-route title, description, JSON-LD
+│   │   ├── ErrorBoundary.tsx   # Route-level crash recovery
+│   │   ├── chat/               # Chat transcript renderer & clear dialog
 │   │   └── ScrollToTop.tsx     # Instant route scroll reset handler
 │   ├── context/
 │   │   ├── ThemeContext.tsx    # Dark/light theme with View Transitions
@@ -106,7 +120,12 @@ portfolv2/
 │   │   ├── projects.ts         # Showcase project catalog & deep details
 │   │   ├── experience.ts       # Work experience & academic roles
 │   │   ├── skills.ts           # Tech stack groupings
+│   │   ├── routes.ts           # Public route manifest for sitemap.xml
 │   │   └── gallery.ts          # Archive image sources
+│   ├── hooks/
+│   │   └── useChat.ts          # Streaming chat state, abort, persistence
+│   ├── lib/
+│   │   └── chat-knowledge.ts   # System prompt & portfolio context
 │   ├── pages/                  # Page-level route views
 │   │   ├── Home.tsx            # Hero, role marquee, stack, selected works
 │   │   ├── About.tsx           # Bio, HoloCard, bento specs, principles
@@ -121,9 +140,10 @@ portfolv2/
 │   ├── main.tsx                # Client application bootstrap
 │   └── index.css               # Design tokens, view transitions, fonts
 ├── .gitignore                  # Production exclusion rules
+├── LICENSE                     # MIT license
 ├── tailwind.config.js          # Tailwind theme extensions
 ├── tsconfig.json               # TypeScript workspace configuration
-└── vite.config.ts              # Vite bundling configuration
+└── vite.config.ts              # Vite bundling + dev chat API + sitemap
 ```
 
 ---
@@ -147,18 +167,32 @@ portfolv2/
    npm install
    ```
 
-3. **Start development server:**
+3. **Configure environment variables:**
+   ```bash
+   cp .env.example .env
+   ```
+   | Variable | Purpose |
+   | :--- | :--- |
+   | `GROQ_API_KEY` | Primary chat provider ([console.groq.com/keys](https://console.groq.com/keys)) |
+   | `OPENROUTER_API_KEY` | Fallback chat provider ([openrouter.ai/keys](https://openrouter.ai/keys)) |
+   | `SITE_URL` | Canonical origin baked into `sitemap.xml` and `robots.txt` at build time. On Vercel this is auto-detected from `VERCEL_PROJECT_PRODUCTION_URL`; locally it is optional and the sitemap is skipped when absent. |
+
+   The chat endpoint needs at least one of the two provider keys; without either,
+   `POST /api/chat` returns `500`.
+
+4. **Start development server:**
    ```bash
    npm run dev
    ```
-   Open `http://localhost:5173` in your browser.
+   Open `http://localhost:5173` in your browser. Vite serves `/api/chat` locally
+   through the same middleware used in production.
 
-4. **Build for production:**
+5. **Build for production:**
    ```bash
    npm run build
    ```
 
-5. **Preview production bundle:**
+6. **Preview production bundle:**
    ```bash
    npm run preview
    ```
@@ -178,10 +212,14 @@ portfolv2/
 
 ## Security & Privacy in Git
 
-The repository is configured with a strict, privacy-first `.gitignore` ensuring that:
-- Personal documentation and sensitive files (`docs/`, `*.pdf`, `*.docx`) are not committed.
-- High-resolution raw photo dumps (`public/img/`, `*.png`, `*.webp`) remain private.
-- Personal configuration files and environment secrets (`.env*`, `src/data/`) are excluded from public pushes.
+The repository is configured with a privacy-first `.gitignore` that:
+
+- Keeps environment secrets out of history: `.env`, `.env.local`, and `*.local` are ignored; only `.env.example` is committed.
+- Keeps source documents private: `docs/`, `*.doc`, `*.docx`, and `*.pdf` are ignored, with an explicit exception for `public/cv.pdf` because the UI links to it.
+- Never ships certificate PDFs: `public/certificates/*.pdf` stays local while the first-page WebP previews are committed.
+- Excludes build output and tooling caches (`dist/`, `node_modules/`, `.vercel`, `.turbo`).
+
+Runtime assets that Vercel needs — `public/img/`, `public/certificates/*.webp`, and `src/data/` — are intentionally tracked.
 
 ---
 

@@ -1,9 +1,9 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
-import type { GenerateContentStreamResult } from '@google/generative-ai'
 import react from '@vitejs/plugin-react'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import { buildChatSystemPrompt } from './src/lib/chat-knowledge.ts'
+import { publicRoutes } from './src/data/routes.ts'
+import { projects } from './src/data/projects.ts'
 
 interface ChatMessage {
   role: 'user' | 'assistant'
@@ -14,17 +14,17 @@ interface ChatRequestBody {
   messages?: ChatMessage[]
 }
 
+const GROQ_MODELS = [
+  "openai/gpt-oss-120b",
+  "qwen/qwen3.8-27b",
+  "openai/gpt-oss-20b",
+];
+
 const OPENROUTER_MODELS = [
   "openrouter/free",
 ];
 
-const GEMINI_FALLBACK_MODELS = [
-  'gemini-2.0-flash',
-  'gemini-1.5-flash',
-  'gemini-1.5-pro',
-]
-
-async function* parseOpenRouterStream(
+async function* parseSseStream(
   stream: ReadableStream<Uint8Array>
 ): AsyncGenerator<string, void, unknown> {
   const reader = stream.getReader()
@@ -83,23 +83,24 @@ async function* parseOpenRouterStream(
   }
 }
 
-async function handleOpenRouterStream(
+async function streamLlmToResponse(
   res: ServerResponse,
-  openrouterKey: string,
-  formattedMessages: ChatMessage[]
-): Promise<void> {
+  endpoint: string,
+  apiKey: string,
+  models: string[],
+  formattedMessages: ChatMessage[],
+  extraHeaders: Record<string, string> = {}
+): Promise<boolean> {
   const systemPrompt = buildChatSystemPrompt()
-  let lastError: string | null = null
 
-  for (const modelName of OPENROUTER_MODELS) {
+  for (const modelName of models) {
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${openrouterKey}`,
+          Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://github.com/andrebaik/portfolv2',
-          'X-Title': 'Mochamad Vicryandre Portfolio',
+          ...extraHeaders,
         },
         body: JSON.stringify({
           model: modelName,
@@ -111,161 +112,35 @@ async function handleOpenRouterStream(
         }),
       })
 
-      if (!response.ok) {
+      if (!response.ok || !response.body) {
         const errText = await response.text()
-        console.warn(`[Vite Dev] OpenRouter model ${modelName} returned HTTP ${response.status}:`, errText)
-        lastError = `Model ${modelName}: HTTP ${response.status} - ${errText}`
-        continue
-      }
-
-      if (!response.body) {
-        console.warn(`[Vite Dev] OpenRouter model ${modelName} returned empty body`)
-        lastError = `Model ${modelName} returned empty body`
+        console.warn(`[Vite Dev] Model ${modelName} returned status ${response.status}:`, errText)
         continue
       }
 
       res.statusCode = 200
       res.setHeader('Content-Type', 'text/plain; charset=utf-8')
       res.setHeader('Cache-Control', 'no-cache')
+      res.setHeader('Transfer-Encoding', 'chunked')
 
-      try {
-        for await (const chunk of parseOpenRouterStream(response.body)) {
-          if (chunk) {
-            res.write(chunk)
-          }
+      const stream = response.body
+      for await (const chunk of parseSseStream(stream)) {
+        if (chunk) {
+          res.write(chunk)
         }
-        res.end()
-        return
-      } catch (streamErr) {
-        console.error('[Vite Dev] OpenRouter streaming error:', streamErr)
-        if (!res.headersSent) {
-          res.statusCode = 500
-          res.setHeader('Content-Type', 'application/json; charset=utf-8')
-          res.end(JSON.stringify({ error: 'Terjadi kesalahan saat streaming respons.' }))
-        } else {
-          res.end()
-        }
-        return
       }
-    } catch (err) {
-      lastError = err instanceof Error ? err.message : String(err)
-      console.warn(`[Vite Dev] OpenRouter model ${modelName} request failed:`, err)
-    }
-  }
 
-  res.statusCode = 502
-  res.setHeader('Content-Type', 'application/json; charset=utf-8')
-  res.end(
-    JSON.stringify({
-      error: `Semua model OpenRouter gagal merespons. ${lastError || ''}`.trim(),
-    })
-  )
-}
-
-async function handleGeminiStream(
-  res: ServerResponse,
-  geminiKey: string,
-  recentMessages: ChatMessage[]
-): Promise<void> {
-  const lastMsg = recentMessages[recentMessages.length - 1]
-  const currentPrompt = lastMsg.content
-  const historyCandidate = recentMessages.slice(0, recentMessages.length - 1)
-
-  interface HistoryItem {
-    role: 'user' | 'model'
-    parts: [{ text: string }]
-  }
-
-  const formattedHistory: HistoryItem[] = []
-  const firstUserIdx = historyCandidate.findIndex((m) => m.role === 'user')
-  if (firstUserIdx !== -1) {
-    for (let i = firstUserIdx; i < historyCandidate.length; i++) {
-      const msg = historyCandidate[i]
-      const mappedRole: 'user' | 'model' =
-        msg.role === 'assistant' ? 'model' : 'user'
-
-      if (
-        formattedHistory.length === 0 ||
-        formattedHistory[formattedHistory.length - 1].role !== mappedRole
-      ) {
-        formattedHistory.push({
-          role: mappedRole,
-          parts: [{ text: msg.content }],
-        })
-      }
-    }
-  }
-
-  if (
-    formattedHistory.length > 0 &&
-    formattedHistory[formattedHistory.length - 1].role === 'user'
-  ) {
-    formattedHistory.pop()
-  }
-
-  const systemInstruction = buildChatSystemPrompt()
-  const genAI = new GoogleGenerativeAI(geminiKey)
-
-  let streamResult: GenerateContentStreamResult | null = null
-  let lastError: unknown = null
-
-  for (const modelName of GEMINI_FALLBACK_MODELS) {
-    try {
-      const model = genAI.getGenerativeModel({
-        model: modelName,
-        systemInstruction,
-      })
-
-      const chat = model.startChat({
-        history: formattedHistory,
-      })
-
-      streamResult = await chat.sendMessageStream(currentPrompt)
-      break
-    } catch (err) {
-      lastError = err
-      console.warn(`[Vite Dev] Model ${modelName} failed, falling back to next...`, err)
-    }
-  }
-
-  if (!streamResult) {
-    const errorDetails =
-      lastError instanceof Error ? lastError.message : 'Gagal memproses AI.'
-    res.statusCode = 502
-    res.setHeader('Content-Type', 'application/json; charset=utf-8')
-    res.end(
-      JSON.stringify({
-        error: `Semua model AI gagal merespons. ${errorDetails}`,
-      })
-    )
-    return
-  }
-
-  res.statusCode = 200
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-  res.setHeader('Cache-Control', 'no-cache')
-
-  try {
-    for await (const chunk of streamResult.stream) {
-      const text = chunk.text()
-      if (text) {
-        res.write(text)
-      }
-    }
-    res.end()
-  } catch (streamErr) {
-    console.error('[Vite Dev] Streaming error:', streamErr)
-    if (!res.headersSent) {
-      res.statusCode = 500
-      res.setHeader('Content-Type', 'application/json; charset=utf-8')
-      res.end(JSON.stringify({ error: 'Terjadi kesalahan saat streaming respons.' }))
-    } else {
       res.end()
+      return true
+    } catch (err) {
+      console.warn(`[Vite Dev] Model ${modelName} request failed:`, err)
     }
   }
+
+  return false
 }
 
-function chatAssistantPlugin(openrouterApiKey?: string, geminiApiKey?: string): Plugin {
+function chatAssistantPlugin(groqApiKey?: string, openrouterApiKey?: string): Plugin {
   return {
     name: 'chat-assistant-plugin',
     configureServer(server) {
@@ -282,13 +157,13 @@ function chatAssistantPlugin(openrouterApiKey?: string, geminiApiKey?: string): 
           return
         }
 
-        if (!openrouterApiKey && !geminiApiKey) {
+        if (!groqApiKey && !openrouterApiKey) {
           res.statusCode = 500
           res.setHeader('Content-Type', 'application/json; charset=utf-8')
           res.end(
             JSON.stringify({
               error:
-                'Chat assistant belum dikonfigurasi. Pastikan OPENROUTER_API_KEY atau GEMINI_API_KEY sudah diset di file .env.',
+                'Chat assistant belum dikonfigurasi. Pastikan GROQ_API_KEY atau OPENROUTER_API_KEY sudah diset di file .env.',
             })
           )
           return
@@ -346,13 +221,96 @@ function chatAssistantPlugin(openrouterApiKey?: string, geminiApiKey?: string): 
             return
           }
 
-          if (openrouterApiKey) {
-            await handleOpenRouterStream(res, openrouterApiKey, recentMessages)
-            return
+          // 1. Try Groq first
+          if (groqApiKey) {
+            const success = await streamLlmToResponse(
+              res,
+              'https://api.groq.com/openai/v1/chat/completions',
+              groqApiKey,
+              GROQ_MODELS,
+              recentMessages
+            )
+            if (success) return
           }
 
-          await handleGeminiStream(res, geminiApiKey!, recentMessages)
+          // 2. Fallback to OpenRouter
+          if (openrouterApiKey) {
+            const success = await streamLlmToResponse(
+              res,
+              'https://openrouter.ai/api/v1/chat/completions',
+              openrouterApiKey,
+              OPENROUTER_MODELS,
+              recentMessages,
+              {
+                'HTTP-Referer': 'https://github.com/andrebaik/portfolv2',
+                'X-Title': 'Mochamad Vicryandre Portfolio',
+              }
+            )
+            if (success) return
+          }
+
+          res.statusCode = 502
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          res.end(
+            JSON.stringify({
+              error: 'Semua model AI (Groq & OpenRouter) gagal merespons. Silakan coba sesaat lagi.',
+            })
+          )
         })
+      })
+    },
+  }
+}
+
+function sitemapPlugin(siteUrl?: string): Plugin {
+  return {
+    name: 'sitemap-plugin',
+    apply: 'build',
+    generateBundle() {
+      const robotsBase = 'User-agent: *\nAllow: /\n\nDisallow: /api/\n'
+
+      if (!siteUrl) {
+        this.warn('SITE_URL is not set — skipping sitemap.xml generation.')
+        this.emitFile({ type: 'asset', fileName: 'robots.txt', source: robotsBase })
+        return
+      }
+
+      const origin = (/^https?:\/\//.test(siteUrl) ? siteUrl : `https://${siteUrl}`).replace(/\/$/, '')
+      const today = new Date().toISOString().slice(0, 10)
+
+      const entries = [
+        ...publicRoutes.map((route) => ({
+          loc: `${origin}${route.path}`,
+          changefreq: route.changefreq,
+          priority: route.priority,
+        })),
+        ...projects.map((project) => ({
+          loc: `${origin}/projects/${project.slug}`,
+          changefreq: 'monthly' as const,
+          priority: '0.7',
+        })),
+      ]
+
+      const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${entries
+  .map(
+    (entry) => `  <url>
+    <loc>${entry.loc}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>${entry.changefreq}</changefreq>
+    <priority>${entry.priority}</priority>
+  </url>`
+  )
+  .join('\n')}
+</urlset>
+`
+
+      this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: xml })
+      this.emitFile({
+        type: 'asset',
+        fileName: 'robots.txt',
+        source: `${robotsBase}\nSitemap: ${origin}/sitemap.xml\n`,
       })
     },
   }
@@ -361,10 +319,15 @@ function chatAssistantPlugin(openrouterApiKey?: string, geminiApiKey?: string): 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
+  const groqApiKey = env.GROQ_API_KEY || process.env.GROQ_API_KEY
   const openrouterApiKey = env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY
-  const geminiApiKey = env.GEMINI_API_KEY || process.env.GEMINI_API_KEY
+  const siteUrl = env.SITE_URL || process.env.SITE_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL
 
   return {
-    plugins: [react(), chatAssistantPlugin(openrouterApiKey, geminiApiKey)],
+    plugins: [
+      react(),
+      chatAssistantPlugin(groqApiKey, openrouterApiKey),
+      sitemapPlugin(siteUrl),
+    ],
   }
 })

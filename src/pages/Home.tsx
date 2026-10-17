@@ -4,6 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 import { Hero } from "../components/Hero";
 import { RoleMarquee, Marquee } from "../components/Marquee";
 import { SectionHeader } from "../components/SectionHeader";
+import { Seo } from "../components/Seo";
 import { ProjectCard } from "../components/ProjectCard";
 import { Timeline } from "../components/Timeline";
 import LogoLoop from "../components/LogoLoop";
@@ -77,7 +78,7 @@ export function Home() {
 
   return (
     <div>
-
+      <Seo path="/" description={t("home.about.subtitle")} />
       <Hero />
       <RoleMarquee roles={roleMarquee} />
       <Marquee

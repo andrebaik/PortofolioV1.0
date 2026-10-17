@@ -1,12 +1,12 @@
 import { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { HelmetProvider } from "react-helmet-async";
 import { AnimatePresence } from "framer-motion";
 import { ThemeProvider } from "./context/ThemeContext";
 import { LanguageProvider } from "./context/LanguageContext";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { ScrollToTop } from "./components/ScrollToTop";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { OpeningScreen } from "./components/OpeningScreen";
 import { SmoothScroll } from "./components/SmoothScroll";
 import { Home } from "./pages/Home";
@@ -32,17 +32,19 @@ function AppContent() {
         <AnimatePresence mode="wait">
           <Suspense fallback={null}>
             <main>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/projects" element={<Projects />} />
-                <Route path="/projects/:slug" element={<ProjectDetail />} />
-                <Route path="/gallery" element={<Gallery />} />
-                <Route path="/experience" element={<Experience />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/ai-assistant" element={<AiAssistant />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <ErrorBoundary key={location.pathname}>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/projects" element={<Projects />} />
+                  <Route path="/projects/:slug" element={<ProjectDetail />} />
+                  <Route path="/gallery" element={<Gallery />} />
+                  <Route path="/experience" element={<Experience />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/ai-assistant" element={<AiAssistant />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </ErrorBoundary>
             </main>
           </Suspense>
         </AnimatePresence>
@@ -56,11 +58,9 @@ export default function App() {
   return (
     <LanguageProvider>
       <ThemeProvider>
-        <HelmetProvider>
-          <BrowserRouter>
-            <AppContent />
-          </BrowserRouter>
-        </HelmetProvider>
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
       </ThemeProvider>
     </LanguageProvider>
   );

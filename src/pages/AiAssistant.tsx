@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Trash2, AlertCircle, ArrowUp, ArrowDown, User, Copy, Check } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { useChat } from "../hooks/useChat";
+import { Seo } from "../components/Seo";
 import { FormatMessage } from "../components/chat/formatMessage";
 import { TypingIndicator } from "../components/chat/TypingIndicator";
 import { ClearChatDialog } from "../components/chat/ClearChatDialog";
@@ -149,6 +150,7 @@ export function AiAssistant() {
 
   return (
     <div className="mx-auto flex h-[calc(100dvh-4rem)] max-w-4xl flex-col px-4 py-3 md:px-6">
+      <Seo path="/ai-assistant" title={t("ai.title")} description={t("ai.subtitle")} />
       {/* Discreet Header: Only clear button when messages exist */}
       {messages.length > 0 && (
         <div className="flex shrink-0 items-center justify-end pb-2">
@@ -298,19 +300,34 @@ export function AiAssistant() {
                 <TypingIndicator isIndonesian={isId} />
               </div>
             )}
+            {/* Screen-reader status: announces the turn, not every streamed token */}
+            <p aria-live="polite" className="sr-only">
+              {isLoading
+                ? isId
+                  ? "Asisten sedang menulis jawaban."
+                  : "Assistant is writing a reply."
+                : messages.length > 0
+                  ? isId
+                    ? "Jawaban selesai."
+                    : "Reply complete."
+                  : ""}
+            </p>
             {/* Error Banner */}
             {error && (
-              <div className="flex items-start gap-2.5 rounded-xl bg-red-500/10 p-4 text-xs text-red-600 dark:bg-red-400/10 dark:text-red-400">
+              <div
+                role="alert"
+                className="flex items-start gap-2.5 rounded-xl bg-red-500/10 p-4 text-xs text-red-600 dark:bg-red-400/10 dark:text-red-400"
+              >
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                 <div className="flex-1">
                   <div className="font-semibold tracking-wide">
                     {isId ? "Terjadi Kesalahan" : "Error Occurred"}
                   </div>
                   <p className="mt-1 leading-relaxed">
-                    {error.includes("OPENROUTER_API_KEY") || error.includes("GEMINI_API_KEY")
+                    {error.includes("GROQ_API_KEY") || error.includes("OPENROUTER_API_KEY")
                       ? isId
-                        ? "API Key belum diset. Tambahkan OPENROUTER_API_KEY atau GEMINI_API_KEY ke file .env Anda."
-                        : "API Key is not configured. Add OPENROUTER_API_KEY or GEMINI_API_KEY to your .env file."
+                        ? "API Key belum diset. Tambahkan GROQ_API_KEY atau OPENROUTER_API_KEY ke file .env Anda."
+                        : "API Key is not configured. Add GROQ_API_KEY or OPENROUTER_API_KEY to your .env file."
                       : error}
                   </p>
                 </div>
