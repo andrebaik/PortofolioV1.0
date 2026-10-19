@@ -137,7 +137,7 @@ export function Footer() {
                   className="group flex items-center justify-between text-neutral-600 transition hover:text-ink dark:text-zinc-400 dark:hover:text-white"
                 >
                   <span className="flex items-center gap-2">
-                    <SiInstagram size={13} /> Instagram / @andrebaik
+                    <SiInstagram size={13} /> Instagram / @andrenrdn_
                   </span>
                   <ArrowUpRight size={13} className="transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </a>
