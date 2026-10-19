@@ -199,9 +199,6 @@ export function Footer() {
           <span>
             © {CURRENT_YEAR} {site.name}. {t("footer.rights")}
           </span>
-          <span className="flex items-center gap-2">
-            <span>BUILT WITH REACT 19 • TAILWIND • WEBGL</span>
-          </span>
         </div>
       </div>
     </footer>
